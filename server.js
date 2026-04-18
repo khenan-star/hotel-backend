@@ -61,6 +61,13 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Database + Start ─────────────────────────────────────────────────────────
+
+app.get('/', (req, res) => {
+  res.status(200).send('API is running...');
+});
+
+const PORT = process.env.PORT || 5000;
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
