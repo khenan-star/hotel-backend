@@ -61,17 +61,10 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Database + Start ─────────────────────────────────────────────────────────
-
-app.get('/', (req, res) => {
-  res.status(200).send('API is running...');
-});
-
-const PORT = process.env.PORT || 5000;
-
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-  const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || 8080;
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
