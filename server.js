@@ -13,28 +13,25 @@ const adminRoutes       = require('./routes/admin');
 
 const app = express();
 
-// ─── Security ─────────────────────────────────────────────────────────────────
-// crossOriginResourcePolicy: false — needed so Railway's proxy doesn't block API responses
+// ─── Security ──────────────────────────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
-// CORS — allow all origins so frontend (Netlify) and browser tests can reach the API
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false  // must be false when origin is '*'
+  credentials: false
 }));
 
-// Respond to preflight OPTIONS for all routes
 app.options('*', cors());
 
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
-// Global rate limiter
+// Rate limiter — 100 req / 15 min
 app.use('/api/', rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: { success: false, message: 'Too many requests, please try again later.' }
 }));
@@ -46,7 +43,7 @@ app.use('/api/auth/', rateLimit({
   message: { success: false, message: 'Too many auth attempts.' }
 }));
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth',         authRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/rooms',        roomRoutes);
@@ -68,7 +65,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── Database + Start ─────────────────────────────────────────────────────────
+// ─── Start server ──────────────────────────────────────────────────────────
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
