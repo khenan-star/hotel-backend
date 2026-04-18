@@ -14,11 +14,19 @@ const adminRoutes       = require('./routes/admin');
 const app = express();
 
 // ─── Security ─────────────────────────────────────────────────────────────────
-app.use(helmet());
+// crossOriginResourcePolicy: false — needed so Railway's proxy doesn't block API responses
+app.use(helmet({ crossOriginResourcePolicy: false }));
+
+// CORS — allow all origins so frontend (Netlify) and browser tests can reach the API
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false  // must be false when origin is '*'
 }));
+
+// Respond to preflight OPTIONS for all routes
+app.options('*', cors());
 
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
@@ -64,7 +72,7 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-  const PORT = process.env.PORT || 8080;
+    const PORT = process.env.PORT || 8080;
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
