@@ -63,7 +63,7 @@ const reservationSchema = new mongoose.Schema({
 
 // Computed totals before save
 reservationSchema.pre('save', function (next) {
-  if (this.isModified('nights') || this.isModified('room')) {
+  if (this.nights && this.room && this.room.pricePerNight) {
     this.subtotal    = this.nights * this.room.pricePerNight;
     this.taxes       = Math.round(this.subtotal * 0.15);
     this.totalAmount = this.subtotal + this.taxes;
