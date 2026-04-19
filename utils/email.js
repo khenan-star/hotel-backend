@@ -56,7 +56,7 @@ const fmtMoney = (n) => 'SAR ' + Number(n).toLocaleString();
 
 // ─── Email: Reservation Confirmation ─────────────────────────────────────────
 exports.sendReservationConfirmation = async (reservation) => {
-  const { guest, room, checkIn, checkOut, nights, guests, bookingRef, subtotal, taxes, totalAmount } = reservation;
+  const { guest, roomName, checkIn, checkOut, nights, guests, bookingRef, subtotal, taxes, totalAmount, pricePerNight } = reservation;
 
   const html = baseTemplate(`
     <p style="font-size:18px; color:#1A1714;">Dear ${guest.firstName},</p>
@@ -66,12 +66,12 @@ exports.sendReservationConfirmation = async (reservation) => {
     <div class="ref-box">${bookingRef}</div>
 
     <table class="detail-table">
-      <tr><td>Room</td><td>${room.name}</td></tr>
+      <tr><td>Room</td><td>${roomName}</td></tr>
       <tr><td>Check-In</td><td>${fmtDate(checkIn)}</td></tr>
       <tr><td>Check-Out</td><td>${fmtDate(checkOut)}</td></tr>
       <tr><td>Duration</td><td>${nights} night${nights > 1 ? 's' : ''}</td></tr>
       <tr><td>Guests</td><td>${guests}</td></tr>
-      <tr><td>Room Rate</td><td>${fmtMoney(room.pricePerNight)} / night</td></tr>
+      <tr><td>Room Rate</td><td>${fmtMoney(pricePerNight)} / night</td></tr>
       <tr><td>Subtotal</td><td>${fmtMoney(subtotal)}</td></tr>
       <tr><td>VAT (15%)</td><td>${fmtMoney(taxes)}</td></tr>
       <tr class="total-row"><td>Total</td><td>${fmtMoney(totalAmount)}</td></tr>
@@ -90,7 +90,7 @@ exports.sendReservationConfirmation = async (reservation) => {
 
 // ─── Email: Payment Receipt ───────────────────────────────────────────────────
 exports.sendPaymentReceipt = async (reservation) => {
-  const { guest, room, bookingRef, totalAmount, payment } = reservation;
+  const { guest, roomName, bookingRef, totalAmount, payment } = reservation;
 
   const html = baseTemplate(`
     <p style="font-size:18px; color:#1A1714;">Dear ${guest.firstName},</p>
@@ -100,7 +100,7 @@ exports.sendPaymentReceipt = async (reservation) => {
     <div class="ref-box">${bookingRef}</div>
 
     <table class="detail-table">
-      <tr><td>Room</td><td>${room.name}</td></tr>
+      <tr><td>Room</td><td>${roomName}</td></tr>
       <tr><td>Amount Paid</td><td>${fmtMoney(totalAmount)}</td></tr>
       <tr><td>Payment Method</td><td>${payment.method || 'Card'}</td></tr>
       <tr><td>Paid On</td><td>${fmtDate(payment.paidAt || new Date())}</td></tr>
@@ -119,7 +119,7 @@ exports.sendPaymentReceipt = async (reservation) => {
 
 // ─── Email: Cancellation ──────────────────────────────────────────────────────
 exports.sendCancellationEmail = async (reservation) => {
-  const { guest, room, bookingRef, checkIn, checkOut, cancelReason } = reservation;
+  const { guest, roomName, bookingRef, checkIn, checkOut, cancelReason } = reservation;
 
   const html = baseTemplate(`
     <p style="font-size:18px; color:#1A1714;">Dear ${guest.firstName},</p>
@@ -129,7 +129,7 @@ exports.sendCancellationEmail = async (reservation) => {
     <div class="ref-box" style="background:#3D3830;">${bookingRef}</div>
 
     <table class="detail-table">
-      <tr><td>Room</td><td>${room.name}</td></tr>
+      <tr><td>Room</td><td>${roomName}</td></tr>
       <tr><td>Original Check-In</td><td>${fmtDate(checkIn)}</td></tr>
       <tr><td>Original Check-Out</td><td>${fmtDate(checkOut)}</td></tr>
       ${cancelReason ? `<tr><td>Reason</td><td>${cancelReason}</td></tr>` : ''}
@@ -174,7 +174,7 @@ exports.sendWelcomeEmail = async (user) => {
 // ─── Email: Admin new booking alert ──────────────────────────────────────────
 exports.sendAdminNewBookingAlert = async (reservation) => {
   if (!process.env.EMAIL_USER) return;
-  const { guest, room, checkIn, checkOut, nights, totalAmount, bookingRef } = reservation;
+  const { guest, roomName, checkIn, checkOut, nights, totalAmount, bookingRef } = reservation;
 
   const html = baseTemplate(`
     <p><strong>New Reservation Received</strong></p>
@@ -182,7 +182,7 @@ exports.sendAdminNewBookingAlert = async (reservation) => {
     <table class="detail-table">
       <tr><td>Ref</td><td>${bookingRef}</td></tr>
       <tr><td>Guest</td><td>${guest.firstName} ${guest.lastName} (${guest.email})</td></tr>
-      <tr><td>Room</td><td>${room.name}</td></tr>
+      <tr><td>Room</td><td>${roomName}</td></tr>
       <tr><td>Check-In</td><td>${fmtDate(checkIn)}</td></tr>
       <tr><td>Check-Out</td><td>${fmtDate(checkOut)}</td></tr>
       <tr><td>Nights</td><td>${nights}</td></tr>
